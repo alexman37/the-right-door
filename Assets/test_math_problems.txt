@@ -1,0 +1,50 @@
+/BLOCK=start
+	HAZEL(wink):Yo Winnie, I've got this really tough math problem.\nThink you can help me?
+	WINTER(armscross):Sure, why not.
+	HAZEL(default):Alright, here goes.
+	HAZEL(naturally)[2]:What's 9 plus 10?
+	/CHOICE
+		nineteen:19
+		twentyone:21
+	/ENDCHOICE
+	WINTER(hmm):What a ridiculous question...
+/ENDBLOCK
+
+/BLOCK=nineteen
+	WINTER(smoke):Obviously, it's 19.
+	HAZEL(naturally):Is that your final answer?\nYou're sure?
+	WINTER(ciglook):Are you asking because you didn't make it past second grade?
+	HAZEL(naturally):No...I'm asking because...
+	HAZEL(huh):You stupid.
+/ENDBLOCK
+
+/BLOCK=twentyone
+	WINTER(smoke):It's 21, of course.
+	HAZEL(huh):Huh?
+	WINTER(ciglook):The math checks out. Don't you agree?
+	HAZEL(bastard):Grr...\nI just thought of another math question.
+	WINTER(hopeful):I hope you'll try harder now.
+	HAZEL(naturally):Oh, I will.
+	HAZEL(default):What's two plus two?
+	/CHOICE
+		four:4
+		four:Four
+		four:For
+		four:Fore
+		fish:Fish
+	/ENDCHOICE
+/ENDBLOCK
+
+/BLOCK=four
+	WINTER(default):Four. Duh.
+	HAZEL(naturally):For deez nuts.
+	WINTER(down):What?
+	HAZEL(huh):What?
+/ENDBLOCK
+
+/BLOCK=fish
+	WINTER(armscross):Why, that must be fish.
+	HAZEL(wtf):Gah!
+	WINTER(facepalm):I think I've had enough of your math questions.
+	HAZEL(well):Damn...you're no fun.
+/ENDBLOCK

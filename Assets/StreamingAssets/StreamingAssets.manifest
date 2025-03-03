@@ -1,0 +1,25 @@
+ManifestFileVersion: 0
+CRC: 1254568907
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: symbols
+      Dependencies: {}
+    Info_1:
+      Name: hazel_portraits
+      Dependencies: {}
+    Info_2:
+      Name: winter_portraits
+      Dependencies: {}
+    Info_3:
+      Name: walk_into
+      Dependencies: {}
+    Info_4:
+      Name: walk_left
+      Dependencies: {}
+    Info_5:
+      Name: walk_right
+      Dependencies: {}
+    Info_6:
+      Name: walk_outward
+      Dependencies: {}

@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 3316412455
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 155408485f40aa9e63df905375dc8f65
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4df8c69f2c8a6ad9e3cbf82bb83e4dc3
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/BundledAssets/char sprite/hazel/bastard.png
+- Assets/BundledAssets/char sprite/hazel/wtf.png
+- Assets/BundledAssets/char sprite/hazel/naturally.png
+- Assets/BundledAssets/char sprite/hazel/ugh.png
+- Assets/BundledAssets/char sprite/hazel/wink.png
+- Assets/BundledAssets/char sprite/hazel/default.png
+- Assets/BundledAssets/char sprite/hazel/well.png
+- Assets/BundledAssets/char sprite/hazel/really.png
+- Assets/BundledAssets/char sprite/hazel/huh.png
+Dependencies: []

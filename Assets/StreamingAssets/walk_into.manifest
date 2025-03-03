@@ -1,0 +1,30 @@
+ManifestFileVersion: 0
+CRC: 1203140968
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: faf557b541f063b944898c9074ddb509
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4df8c69f2c8a6ad9e3cbf82bb83e4dc3
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Sprites/walk_into/gray.png
+- Assets/Sprites/walk_into/hazel_2.png
+- Assets/Sprites/walk_into/angelo.png
+- Assets/Sprites/walk_into/raven.png
+- Assets/Sprites/walk_into/hazel.png
+- Assets/Sprites/walk_into/allison.png
+- Assets/Sprites/walk_into/cassidy.png
+- Assets/Sprites/walk_into/hazel_1.png
+- Assets/Sprites/walk_into/damon.png
+- Assets/Sprites/walk_into/winter.png
+- Assets/Sprites/walk_into/winter_1.png
+- Assets/Sprites/walk_into/winter_2.png
+Dependencies: []

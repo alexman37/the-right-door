@@ -1,0 +1,24 @@
+ManifestFileVersion: 0
+CRC: 2249408964
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 98a9354f2b8d5826b5580378939a525e
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4df8c69f2c8a6ad9e3cbf82bb83e4dc3
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Sprites/walk_outward/winter.png
+- Assets/Sprites/walk_outward/hazel_1.png
+- Assets/Sprites/walk_outward/hazel_2.png
+- Assets/Sprites/walk_outward/winter_1.png
+- Assets/Sprites/walk_outward/hazel.png
+- Assets/Sprites/walk_outward/winter_2.png
+Dependencies: []

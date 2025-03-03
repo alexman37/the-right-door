@@ -1,0 +1,25 @@
+ManifestFileVersion: 0
+CRC: 2330162979
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: d631d56b7432763a9944ebd90d2c1fe2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4df8c69f2c8a6ad9e3cbf82bb83e4dc3
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/BundledAssets/Symbols/bowtie.png
+- Assets/BundledAssets/Symbols/snowflake.png
+- Assets/BundledAssets/Symbols/crown.png
+- Assets/BundledAssets/Symbols/spiral.png
+- Assets/BundledAssets/Symbols/star.png
+- Assets/BundledAssets/Symbols/empty.png
+- Assets/BundledAssets/Symbols/heart.png
+Dependencies: []

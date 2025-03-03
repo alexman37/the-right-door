@@ -1,0 +1,12 @@
+/BLOCK=start
+	HAZEL(naturally):Where's the Company Cruiser?
+	WINTER(default):\9Jordan\! took it.
+	HAZEL(huh)[2]:\iWhat.\!
+	WINTER(smoke):I wouldn't worry about it.
+	HAZEL(really):\bWell I would!\!\nWhere is he!?
+	WINTER(ciglook):Over by that cliff.\nHe appears to be gaining control of it.
+	WINTER(down):...
+	WINTER(facepalm):Disregard that.
+	HAZEL(wtf):HEY! \9JORDAN!\!
+	HAZEL(ugh)[2]:...And there it goes.
+/ENDBLOCK

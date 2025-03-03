@@ -1,0 +1,26 @@
+ManifestFileVersion: 0
+CRC: 2517263190
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: bbf05c3d358fe0721226a149e42926ae
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4df8c69f2c8a6ad9e3cbf82bb83e4dc3
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/BundledAssets/char sprite/winter/hopeful.png
+- Assets/BundledAssets/char sprite/winter/facepalm.png
+- Assets/BundledAssets/char sprite/winter/default.png
+- Assets/BundledAssets/char sprite/winter/armscross.png
+- Assets/BundledAssets/char sprite/winter/smoke.png
+- Assets/BundledAssets/char sprite/winter/hmm.png
+- Assets/BundledAssets/char sprite/winter/down.png
+- Assets/BundledAssets/char sprite/winter/ciglook.png
+Dependencies: []
