@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 1254568907
+CRC: 1154206706
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -22,4 +22,7 @@ AssetBundleManifest:
       Dependencies: {}
     Info_6:
       Name: walk_outward
+      Dependencies: {}
+    Info_7:
+      Name: cassidy_portraits
       Dependencies: {}

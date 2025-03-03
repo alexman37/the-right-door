@@ -1,0 +1,29 @@
+/BLOCK=start
+	HAZEL(ugh):\bI am NOT crazy!\!
+	HAZEL(huh):I am not crazy.\nI know he swapped \9those numbers\!, I knew it was-
+	/CHOICE
+		sixteen:1216
+		seventeen:1217
+		seventeen:1712
+	/ENDCHOICE
+	
+/ENDBLOCK
+
+/BLOCK=sixteen
+	WINTER(smoke):1216...\none after magna carta\n\sas if she could ever make such a mistake\!
+	HAZEL(bastard):Never. Never!
+	WINTER(hmm):\0(she just couldn't prove it...)\!
+	HAZEL(really):He- he covered his tracks. He got \5that idiot\! at-
+	/CHOICE
+		printer:The printer shop
+		coffee:The coffee shop
+	/ENDCHOICE
+	HAZEL(wtf):That \9idiot\! at the \bcoffee shop\! to lie for him!
+	CASSIDY(demo_concerned):Ms. Heathers, please, you don't have to do this-
+	HAZEL(ugh):You think this is something?\nYou think \ithis\! is bad?
+	HAZEL(huh):This? This chicanery?\n\bHe's done worse!\!
+/ENDBLOCK
+
+/BLOCK=seventeen
+	HAZEL(default):Oh wait nvm
+/ENDBLOCK

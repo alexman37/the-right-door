@@ -175,6 +175,7 @@ public class DialogueManager : MonoBehaviour
         string activeDirective = "";
         Dictionary<string, string> charHexCodes = new Dictionary<string, string>()
         {
+            { "0", "#aaaaaa" }, //inner monologue
             { "1", "#418c49" }, //hazel
             { "2", "#007f7f" }, //winter
             { "3", "#ef5c00" }, //cassidy
