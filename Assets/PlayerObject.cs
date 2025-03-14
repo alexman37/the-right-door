@@ -8,10 +8,18 @@ using System.IO;
 public class PlayerObject : MonoBehaviour
 {
     public GameObject characterObj;
+    public Coords currPosition = new Coords(5,3);
     public ActiveCharacter character;
     public int order;
 
     private string direction;
+
+    //Spawn the character in a new room. Reset some of their stats
+    public void quoteOnQuoteInitialize(Coords startPos, int order)
+    {
+        currPosition = startPos;
+        this.order = order;
+    }
 
     public void changeSprite(string direction, int frame)
     {

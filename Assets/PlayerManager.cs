@@ -7,7 +7,7 @@ using System.IO;
  * The script is generally the highest level of this, so it keeps track of what the player is doing and what they're allowed to do
  * Handles many things including:
  *   - Movement (disabled in dialogue, cutscenes, etc.)
- *   - etc...
+ *   - Interaction with RoomObjects
  */
 public class PlayerManager : MonoBehaviour
 {
@@ -16,6 +16,9 @@ public class PlayerManager : MonoBehaviour
     public ActiveCharacter activeChar;
 
     private List<(float time, float xChange, float yChange)> moveInputs;
+    private Coroutine movingCoroutine;
+
+    KeyCode holdingKey = KeyCode.None;
 
     // Start is called before the first frame update
     void Start()
@@ -28,38 +31,52 @@ public class PlayerManager : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Q))
         {
-            StartCoroutine(controlMovement());
+            movingCoroutine = StartCoroutine(controlMovement());
         }
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            StopCoroutine(controlMovement());
+            StopCoroutine(movingCoroutine);
+        }
+
+        if(Input.GetKey(KeyCode.D))
+        {
+            holdingKey = KeyCode.D;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            holdingKey = KeyCode.A;
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            holdingKey = KeyCode.W;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            holdingKey = KeyCode.S;
         }
     }
 
     IEnumerator controlMovement()
     {
-        float timeToMove1Tile = 0.3f;
+        float timeToMove1Tile = 0.2f;
         
-
         while (true)
         {
-            if(Input.GetKey(KeyCode.D))
+            if (holdingKey != KeyCode.None && !Input.GetKey(holdingKey))
             {
-                yield return congaLineMovement(timeToMove1Tile, 1, 0, "walk_right");
+                holdingKey = KeyCode.None;
             }
-            else if (Input.GetKey(KeyCode.A))
+            if (holdingKey != KeyCode.None)
             {
-                yield return congaLineMovement(timeToMove1Tile, -1, 0, "walk_left");
+                switch (holdingKey)
+                {
+                    case KeyCode.D: yield return congaLineMovement(timeToMove1Tile, 1, 0, "walk_right"); break;
+                    case KeyCode.A:  yield return congaLineMovement(timeToMove1Tile, -1, 0, "walk_left"); break;
+                    case KeyCode.W:    yield return congaLineMovement(timeToMove1Tile, 0, 1, "walk_outward"); break;
+                    case KeyCode.S:  yield return congaLineMovement(timeToMove1Tile, 0, -1, "walk_into"); break;
+                }
             }
-            else if (Input.GetKey(KeyCode.W))
-            {
-                yield return congaLineMovement(timeToMove1Tile, 0, 1, "walk_outward");
-            }
-            else if (Input.GetKey(KeyCode.S))
-            {
-                yield return congaLineMovement(timeToMove1Tile, 0, -1, "walk_into");
-            }
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.02f);
         }
     }
 
@@ -72,21 +89,33 @@ public class PlayerManager : MonoBehaviour
     // Move a tile, and adjust animation frame as you go. Takes a certain amount of time
     IEnumerator moveOneOver(PlayerObject c, float timeToMove1Tile, float xChange, float yChange)
     {
-        float steps = 60;
+        float steps = 30;
         float animationLoops = 1;
         int prevAnimation = 0;
-        for (int i = 0; i < steps; i++)
-        {
-            c.characterObj.transform.position = c.characterObj.transform.position + new Vector3(1 / steps * xChange, 1 / steps * yChange, 0);
 
-            //We end up using a total of 4 sprites in a loop: 0, 1, 0, 2...
-            int nextIFrame = (int)(i / (steps / animationLoops / 4)) % 4;
-            if (prevAnimation != nextIFrame)
+        //If applicable...
+        Coords wouldBeHere = c.currPosition.offset((int)xChange, (int)yChange);
+        if (inBounds(wouldBeHere) && RoomGeneration.activeRoom.tileArray[wouldBeHere.x, wouldBeHere.y].walkable)
+        {
+            // Update their charPosition in the PlayerObject once and immediately
+            c.currPosition.offsetThis((int)xChange, (int)yChange);
+            for (int i = 0; i < steps; i++)
             {
-                c.changeAnimationFrame(nextIFrame);
+                // Update their physical location in-game periodically
+                c.characterObj.transform.position = c.characterObj.transform.position + new Vector3(1 / steps * xChange, 1 / steps * yChange, 0);
+
+                //We end up using a total of 4 sprites in a loop: 0, 1, 0, 2...
+                int nextIFrame = (int)(i / (steps / animationLoops / 4)) % 4;
+                if (prevAnimation != nextIFrame)
+                {
+                    c.changeAnimationFrame(nextIFrame);
+                }
+                yield return new WaitForSeconds(timeToMove1Tile / steps);
             }
-            yield return new WaitForSeconds(timeToMove1Tile / steps);
         }
+        else Debug.Log("I was stopped at " + wouldBeHere);
+
+        
     }
 
     // Move the characters. Follow the leader.
@@ -116,7 +145,10 @@ public class PlayerManager : MonoBehaviour
 
 
 
-
+    private bool inBounds(Coords wouldBeHere)
+    {
+        return wouldBeHere.x >= 0 && wouldBeHere.y >= 0 && wouldBeHere.x < RoomGeneration.activeRoom.roomWidth && wouldBeHere.y < RoomGeneration.activeRoom.roomHeight;
+    }
 
 
 
