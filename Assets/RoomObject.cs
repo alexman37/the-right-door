@@ -9,7 +9,8 @@ public class RoomObject : MonoBehaviour
 {
     public TextAsset dialogueFile;
     public string mouseOverLabel;
-    public Coords[] gridPositions;
+    public Coords absoluteCoords; // Where in the world is this?
+    public Coords[] relativePositions; // RELATIVE to absolute coords, the object also extends to these places
 
     private DialogueManager dialogueManager;
 
@@ -27,5 +28,10 @@ public class RoomObject : MonoBehaviour
     private void OnMouseOver()
     {
         Debug.Log(mouseOverLabel);
+    }
+
+    public override string ToString()
+    {
+        return gameObject.name;
     }
 }

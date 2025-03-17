@@ -1,0 +1,11 @@
+/BLOCK=start
+	HAZEL(default):It's a table.
+	HAZEL(huh):I mean, what else would it be? Dumbass.
+/ENDBLOCK
+
+/BLOCK=start-W
+	WINTER(default):It's a table.\nIt has 4 legs, each a few inches in diameter, which seem fairly sturdy.\nIt could probably support over 200 pounds.
+	WINTER(ciglook):The craftsmanship is immaculate.\nNot a scratch, dent or crack on it.
+	WINTER(hmm):It's almost...\itoo\! artificial.
+	HAZEL(ugh):\i*yawn*\!
+/ENDBLOCK

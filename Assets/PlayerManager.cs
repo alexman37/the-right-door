@@ -15,27 +15,47 @@ public class PlayerManager : MonoBehaviour
     public PlayerObject[] playerObjects;
     public ActiveCharacter activeChar;
 
+    //Related to movement
     private List<(float time, float xChange, float yChange)> moveInputs;
-    private Coroutine movingCoroutine;
-
+    private Coroutine movingCoroutine; private bool isMoving;
     KeyCode holdingKey = KeyCode.None;
+
+    //Misc
+    private DialogueManager dialogueManager;
 
     // Start is called before the first frame update
     void Start()
     {
+        RoomManager.currentRoomChanged += updateCurrentRoom;
+
         moveInputs = new List<(float time, float xChange, float yChange)>();
+        startMovement();
+        dialogueManager = FindObjectsOfType<DialogueManager>()[0];
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Q))
+        //Interaction
+        if(Input.GetKeyDown(KeyCode.E))
         {
-            movingCoroutine = StartCoroutine(controlMovement());
-        }
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            StopCoroutine(movingCoroutine);
+            RoomObject maybeRoomObject = getInteractingWithEKeyObject();
+            if(maybeRoomObject != null)
+            {
+                // If it's a door, open it!
+                // Else, if this room object has a dialogue conversation, play it!
+                if(maybeRoomObject is DoorObject)
+                {
+                    //TODO: Character consequences- here or DoorObject? Probably here.
+                    (maybeRoomObject as DoorObject).openDoor();
+                } else
+                {
+                    if (maybeRoomObject.dialogueFile != null)
+                    {
+                        dialogueManager.processConversation(maybeRoomObject.dialogueFile);
+                    }
+                }
+            }
         }
 
         if(Input.GetKey(KeyCode.D))
@@ -70,10 +90,10 @@ public class PlayerManager : MonoBehaviour
             {
                 switch (holdingKey)
                 {
-                    case KeyCode.D: yield return congaLineMovement(timeToMove1Tile, 1, 0, "walk_right"); break;
-                    case KeyCode.A:  yield return congaLineMovement(timeToMove1Tile, -1, 0, "walk_left"); break;
-                    case KeyCode.W:    yield return congaLineMovement(timeToMove1Tile, 0, 1, "walk_outward"); break;
-                    case KeyCode.S:  yield return congaLineMovement(timeToMove1Tile, 0, -1, "walk_into"); break;
+                    case KeyCode.D: yield return congaLineMovement(timeToMove1Tile, 1, 0, Direction.EAST); break;
+                    case KeyCode.A:  yield return congaLineMovement(timeToMove1Tile, -1, 0, Direction.WEST); break;
+                    case KeyCode.W:    yield return congaLineMovement(timeToMove1Tile, 0, 1, Direction.NORTH); break;
+                    case KeyCode.S:  yield return congaLineMovement(timeToMove1Tile, 0, -1, Direction.SOUTH); break;
                 }
             }
             yield return new WaitForSeconds(0.02f);
@@ -81,7 +101,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     // Change the direction this sprite is looking
-    private void changeSpriteDirection(PlayerObject character, string direction)
+    private void changeSpriteDirection(PlayerObject character, Direction direction)
     {
         character.changeSprite(direction, 0);
     }
@@ -94,8 +114,9 @@ public class PlayerManager : MonoBehaviour
         int prevAnimation = 0;
 
         //If applicable...
+        Debug.Log(c.currPosition);
         Coords wouldBeHere = c.currPosition.offset((int)xChange, (int)yChange);
-        if (inBounds(wouldBeHere) && RoomGeneration.activeRoom.tileArray[wouldBeHere.x, wouldBeHere.y].walkable)
+        if (inBounds(wouldBeHere) && RoomManager.activeRoom.tileArray[wouldBeHere.x, wouldBeHere.y].walkable)
         {
             // Update their charPosition in the PlayerObject once and immediately
             c.currPosition.offsetThis((int)xChange, (int)yChange);
@@ -113,13 +134,13 @@ public class PlayerManager : MonoBehaviour
                 yield return new WaitForSeconds(timeToMove1Tile / steps);
             }
         }
-        else Debug.Log("I was stopped at " + wouldBeHere);
+        //else Debug.Log("I was stopped at " + wouldBeHere);
 
         
     }
 
     // Move the characters. Follow the leader.
-    IEnumerator congaLineMovement(float time, float xC, float yC, string direction)
+    IEnumerator congaLineMovement(float time, float xC, float yC, Direction direction)
     {
         // Add to the front of moveInputs- shift everything else down!
         moveInputs.Add((time, xC, yC));
@@ -131,7 +152,7 @@ public class PlayerManager : MonoBehaviour
         }
         for(int q = 0; q < moveInputs.Count; q++)
         {
-            if (q == playerObjects.Length) moveInputs.RemoveAt(playerObjects.Length); //test
+            if (q == playerObjects.Length) moveInputs.RemoveAt(playerObjects.Length);
             else
             {
                 (_, float xChange, float yChange) = moveInputs[q];
@@ -143,15 +164,69 @@ public class PlayerManager : MonoBehaviour
         yield return new WaitForSeconds(time);
     }
 
+    /*Get the object you'd like to interact with by pressing the E key
+     If you're standing on top of something, do that
+     Otherwise, get the thing one grid space in front of you*/
+    private RoomObject getInteractingWithEKeyObject()
+    {
+        RoomObject onTopOf;
+        RoomObject inFrontOf;
+
+        // Try getting on top of object first.
+        onTopOf = RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition);
+        if (onTopOf != null) return onTopOf;
+
+        // Else, look in front of you.
+        // This may end up being on a "wall", or, one tile "out of bounds"
+        switch(playerObjects[0].direction)
+        {
+            case Direction.NORTH:
+                return RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition.offset(0, 1));
+            case Direction.SOUTH:
+                return RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition.offset(0, -1));
+            case Direction.EAST:
+                return RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition.offset(1, 0));
+            case Direction.WEST:
+                return RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition.offset(-1, 0));
+            default: return null;
+        }
+    }
 
 
     private bool inBounds(Coords wouldBeHere)
     {
-        return wouldBeHere.x >= 0 && wouldBeHere.y >= 0 && wouldBeHere.x < RoomGeneration.activeRoom.roomWidth && wouldBeHere.y < RoomGeneration.activeRoom.roomHeight;
+        return RoomManager.activeRoom.inBounds(wouldBeHere);
     }
 
+    // Room transition - move all characters to next spot, and other things
+    private void updateCurrentRoom(Room r)
+    {
+        Debug.Log("Changing room to..." + r);
+        moveInputs.Clear();
+        foreach (PlayerObject playerObj in playerObjects)
+        {
+            // Physical equality...screw unity, man
+            playerObj.moveToPosition(new Coords(r.entryPoint.x, r.entryPoint.y), r);
+        }
+    }
 
+    public void startMovement()
+    {
+        if(!isMoving)
+        {
+            isMoving = true;
+            movingCoroutine = StartCoroutine(controlMovement());
+        }
+    }
 
+    public void stopMovement()
+    {
+        if (isMoving)
+        {
+            isMoving = false;
+            StopCoroutine(movingCoroutine);
+        }
+    }
 
 
 }

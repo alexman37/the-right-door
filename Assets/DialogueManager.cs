@@ -15,6 +15,8 @@ using TMPro;
  * For it to work, it needs a "DialogueSet" object that specifies all of this.
  * DialogueSets are obtained by parsing a dialogue text file, which is done by the DialogueParser.
 */
+
+//Why not static?: DialogueManager has to communicate with UI objects.
 public class DialogueManager : MonoBehaviour
 {
     public GameObject dialogueContainer;
@@ -24,7 +26,7 @@ public class DialogueManager : MonoBehaviour
     Button dc_choice;
     List<Button> new_choice_buttons = new List<Button>();
 
-    DialogueSet currConversation;
+    DialogueSet currConversation = null;
     DialogueBlock block;
     string nextBlock = null;
     int entryInBlock = 0;
@@ -35,6 +37,9 @@ public class DialogueManager : MonoBehaviour
     string lastCharToSpeak = "";
 
     public static event Action anyClick;
+
+    // PlayerManager needed to know when to stop movement / other interactions
+    PlayerManager playerManager;
 
     private void Start()
     {
@@ -47,6 +52,8 @@ public class DialogueManager : MonoBehaviour
         dc_portrait = dialogueContainer.transform.GetChild(1).GetComponent<Image>();
         dc_text = dialogueContainer.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
         dc_choice = dialogueContainer.transform.GetChild(3).GetComponent<Button>();
+
+        playerManager = FindObjectsOfType<PlayerManager>()[0];
     }
 
     private void Update()
@@ -62,12 +69,21 @@ public class DialogueManager : MonoBehaviour
     // And set up the subscription for 
     public void processConversation(TextAsset txt)
     {
-        DialogueSet dialogue = DialogueParser.parseDialogue(txt);
-        currConversation = dialogue;
-        block = currConversation.dialogueBlocks.Find(block => block.blockName == "start");
+        if(currConversation == null)
+        {
+            DialogueSet dialogue = DialogueParser.parseDialogue(txt);
+            currConversation = dialogue;
+            block = currConversation.dialogueBlocks.Find(block => block.blockName == "start");
 
-        anyClick += advanceDialogue;
-        startConversation();
+            // Stop movement
+            playerManager.stopMovement();
+
+            anyClick += advanceDialogue;
+            startConversation();
+        } else
+        {
+            Debug.LogError("Could not process conversation " + txt.name + " - a conversation is already in progress");
+        }
     }
 
     // Either display the next line of dialogue in this block or go to the next block (or end the conversation)
@@ -301,6 +317,9 @@ public class DialogueManager : MonoBehaviour
         nextBlock = null;
         entryInBlock = 0;
         dialogueContainer.SetActive(false);
+
+        // Restart movement again
+        playerManager.startMovement();
     }
 
 
