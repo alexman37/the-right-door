@@ -114,7 +114,6 @@ public class PlayerManager : MonoBehaviour
         int prevAnimation = 0;
 
         //If applicable...
-        Debug.Log(c.currPosition);
         Coords wouldBeHere = c.currPosition.offset((int)xChange, (int)yChange);
         if (inBounds(wouldBeHere) && RoomManager.activeRoom.tileArray[wouldBeHere.x, wouldBeHere.y].walkable)
         {

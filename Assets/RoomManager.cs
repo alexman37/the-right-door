@@ -13,7 +13,9 @@ using UnityEngine.UI;
  */
 public class RoomManager : MonoBehaviour
 {
+    const int MAX_ROOMS_LOADED = 9;
     public static Room activeRoom;
+    public Room[] loadedRooms;
 
     public static event Action<Room> currentRoomChanged;
 
@@ -24,7 +26,7 @@ public class RoomManager : MonoBehaviour
 
     //TODO: REMOVE ALL OF THIS: It's just for testing.
     // Start is called before the first frame update
-    private Tilemap standardTilemap;
+    public Tilemap standardTilemap;
     public Tile demoTile;
     public RoomObject test1;
     public RoomObject test2;
@@ -35,6 +37,7 @@ public class RoomManager : MonoBehaviour
     void Start()
     {
         instance = this;
+        loadedRooms = new Room[MAX_ROOMS_LOADED];
         playerManager = FindObjectsOfType<PlayerManager>()[0];
         fadeCanvas = gameObject.transform.GetChild(0).GetComponent<Canvas>();
         fadeBlock = fadeCanvas.gameObject.transform.GetChild(0).GetComponent<Image>();
@@ -53,9 +56,10 @@ public class RoomManager : MonoBehaviour
             }
         }
         Room starterRoom = new Room(new Coords(0,0), -6, -3, startTileArray);
-        Room otherRoom = new Room(new Coords(200, 0), 200, -3, startTileArray);
-        otherRoom.entryPoint = new Coords(0, 0);
-        test3.nextRoom = otherRoom;
+
+        generateNewRoom(1, new Coords(200, 0), standardTilemap, demoTile);
+        //This is sooooo illegal
+        
 
         starterRoom.addRoomObject(test1);
         starterRoom.addRoomObject(test2);
@@ -65,6 +69,23 @@ public class RoomManager : MonoBehaviour
         Debug.Log("Setting active room");
         activeRoom = starterRoom;
     }
+
+    // Generate a new room in one of our load spots
+    async void generateNewRoom(int index, Coords pos, Tilemap tl, Tile demo)
+    {
+        //TODO clear out the old room!!!
+
+        // Now generate the new room.
+        loadedRooms[index] = await RoomGeneration.generateNewRoom(pos, tl, demo);
+
+        //TODO
+        test3.nextRoom = loadedRooms[1];
+    }
+
+
+
+    // Generate a new room at a designated location.
+    // We should make this an async process, and we have to be smart about when we do it.
 
     public static void changeCurrentRoom(Room changeToThis)
     {
@@ -79,7 +100,7 @@ public class RoomManager : MonoBehaviour
     {
         int steps = 20;
         fadeCanvas.gameObject.SetActive(true);
-        for(int i = 0; i < steps; i++)
+        for(int i = 0; i <= steps; i++)
         {
             fadeBlock.color = new Color(fadeBlock.color.r, fadeBlock.color.g, fadeBlock.color.b, (float) i / (float)steps);
             yield return new WaitForSeconds(timeToFade / steps);
@@ -89,7 +110,7 @@ public class RoomManager : MonoBehaviour
         // Call action when next room is ready- player position will change, among other things
         currentRoomChanged.Invoke(changeToThis);
 
-        for (int i = 0; i < steps; i++)
+        for (int i = 0; i <= steps; i++)
         {
             fadeBlock.color = new Color(fadeBlock.color.r, fadeBlock.color.g, fadeBlock.color.b, 1 - (float)i / (float)steps);
             yield return new WaitForSeconds(timeToFade / steps);
