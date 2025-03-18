@@ -28,6 +28,7 @@ public class RoomManager : MonoBehaviour
     // Start is called before the first frame update
     public Tilemap standardTilemap;
     public Tile demoTile;
+    public Tile demoTile2;
     public RoomObject test1;
     public RoomObject test2;
     public DoorObject test3;
@@ -55,9 +56,9 @@ public class RoomManager : MonoBehaviour
                 startTileArray[xx + 6, yy + 3] = new RoomTile(true, new Coords(xx + 6, yy + 3), demoTile);
             }
         }
-        Room starterRoom = new Room(new Coords(0,0), -6, -3, startTileArray);
+        Room starterRoom = new Room(new Coords(0,0), -6, -3, startTileArray, 10, 6);
 
-        generateNewRoom(1, new Coords(200, 0), standardTilemap, demoTile);
+        generateNewRoom(1, new Coords(200, 0), standardTilemap, demoTile, demoTile2);
         //This is sooooo illegal
         
 
@@ -71,12 +72,12 @@ public class RoomManager : MonoBehaviour
     }
 
     // Generate a new room in one of our load spots
-    async void generateNewRoom(int index, Coords pos, Tilemap tl, Tile demo)
+    async void generateNewRoom(int index, Coords pos, Tilemap tl, Tile demo, Tile demo2)
     {
         //TODO clear out the old room!!!
 
         // Now generate the new room.
-        loadedRooms[index] = await RoomGeneration.generateNewRoom(pos, tl, demo);
+        loadedRooms[index] = await RoomGeneration.generateNewRoom(pos, tl, demo, demo2);
 
         //TODO
         test3.nextRoom = loadedRooms[1];
@@ -145,19 +146,23 @@ public class Room
     public RoomTile[,] tileArray;
 
     public int roomWidth;
+    public int roomWidthWithWall;
     public int roomHeight;
+    public int roomHeightWithWall;
 
     //Turns out Unity Dictionaries' ContainsKey() method only looks for Physical equality. Go figure...
     public Dictionary<Vector2Int, RoomObject> roomObjectsMap = new Dictionary<Vector2Int, RoomObject>();
 
-    public Room(Coords crit, int xo, int yo, RoomTile[,] roomTiles)
+    public Room(Coords crit, int xo, int yo, RoomTile[,] roomTiles, int trueWidth, int trueHeight)
     {
         criticalPoint = crit;
         roomPosToRealPosXOffset = xo;
         roomPosToRealPosYOffset = yo;
         this.tileArray = roomTiles; //TODO: Deep copy? is it a problem?
-        roomWidth = roomTiles.GetLength(0);
-        roomHeight = roomTiles.GetLength(1);
+        roomWidth = trueWidth;
+        roomWidthWithWall = roomTiles.GetLength(0);
+        roomHeight = trueHeight;
+        roomHeightWithWall = roomTiles.GetLength(1);
     }
 
     //Convert from Room position to real position
@@ -191,7 +196,14 @@ public class Room
 
     public bool inBounds(Coords wouldBeHere)
     {
-        return wouldBeHere.x >= 0 && wouldBeHere.y >= 0 && wouldBeHere.x < roomWidth && wouldBeHere.y < roomHeight;
+        int trueStartOfRoomX = (roomWidthWithWall - roomWidth) / 2;
+        return wouldBeHere.x >= trueStartOfRoomX && wouldBeHere.y >= 0 && wouldBeHere.x < trueStartOfRoomX + roomWidth && wouldBeHere.y < roomHeight;
+    }
+
+    //Only use this in wall generation
+    public bool isWallEligible(Coords neighboring)
+    {
+        return !inBounds(neighboring) || tileArray[neighboring.x, neighboring.y] == null;
     }
 
     public RoomObject getRoomObjectAt(Coords position)

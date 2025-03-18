@@ -3765,6 +3765,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   standardTilemap: {fileID: 1370007154}
   demoTile: {fileID: 11400000, guid: d3f93044e08611349bbc0230983a9f26, type: 2}
+  demoTile2: {fileID: 11400000, guid: f528f797733ec054587eafab4bb38684, type: 2}
   test1: {fileID: 241347904}
   test2: {fileID: 1652881005}
   test3: {fileID: 926609077}
