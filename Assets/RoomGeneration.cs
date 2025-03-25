@@ -16,31 +16,52 @@ public static class RoomGeneration
 {
     // "Noooo you cant just generate random numbers in an async block!!!" -beta unity.
     // So we generate a bunch of random floats and can use them at our discretion. Be sure to regen often.
-    private static float[] RANDOM_VALUES = new float[50];
+    private static float[] RANDOM_VALUES = new float[100];
+    private static int RANDOM_VALUE_INDEX = 0;
     public static int wallHeight = 3;
     public static int wallWidth = 1;
 
+    ///  Regenerate the random values list.
     private static void regenRandomValues()
     {
-        for (int i = 0; i < 10; i++) RANDOM_VALUES[i] = Random.value;
+        RANDOM_VALUE_INDEX = 0;
+        for (int i = 0; i < 100; i++) RANDOM_VALUES[i] = Random.value;
+    }
+
+    /// Get the next random value
+    public static float getRandomValue()
+    {
+        float randomValue = RANDOM_VALUES[RANDOM_VALUE_INDEX % 100];
+        RANDOM_VALUE_INDEX++;
+        return randomValue;
+    }
+
+    /// Get the next random value in an interger range- inclusive on both ends
+    public static int getRandomRangeInt(int min, int max)
+    {
+        float randomValue = getRandomValue();
+        return Mathf.FloorToInt(min + (int)((float)(max - min + 1) * randomValue));
     }
 
     //TODO adjust these arguments to be more general
     // Especially need a better way to get tiles from the tilemap.
-    public async static Task<Room> generateNewRoom(Coords criticalPoint, Tilemap standardTilemap, Tile demoTile1, Tile demoTile2)
+    public async static Task<Room> generateNewRoom(int index, Coords criticalPoint, RG_SettingGen theSetting, Tilemap standardTilemap)
     {
         //TODO: Find some semi-consistent way to do this
         regenRandomValues();
         Room newRoom = null;
         await Task.Run(() =>
         {
-            LayoutShape shapeChosen = LayoutShape.RIGHT_TRIANGLE;
+            LayoutShape shapeChosen = LayoutShape.RECTANGLE;
 
-            //newRoom = LayoutGeneration.randomSquare(criticalPoint, (int)(RANDOM_VALUES[1] * 12 + 5), demoTile1); //TODO: Better tile choosing
-            //newRoom = LayoutGeneration.randomRect(criticalPoint, (int)(RANDOM_VALUES[1] * 12 + 5), (int)(RANDOM_VALUES[2] * 12 + 5), demoTile1);
-            newRoom = LayoutGeneration.randomRightTriangle(criticalPoint, (int)(RANDOM_VALUES[1] * 12 + 5), (int)(RANDOM_VALUES[1] * 12 + 5), demoTile1);
-            ObjectGenerationInput inputs = WallGeneration.defineWalls(newRoom, shapeChosen, demoTile2);
-            ObjectGeneration.fillWithObjects(newRoom);
+            //newRoom = LayoutGeneration.randomSquare(criticalPoint, getRandomRangeInt(5,10), theSetting.tilemapCodex.baseFloor.tile);
+            newRoom = LayoutGeneration.randomRect(criticalPoint, getRandomRangeInt(5, 10), getRandomRangeInt(5, 10), theSetting.tilemapCodex.baseFloor.tile);
+            newRoom.roomNumber = index;
+            //newRoom = LayoutGeneration.randomRightTriangle(criticalPoint, getRandomRangeInt(5,11), getRandomRangeInt(5,11), theSetting.tilemapCodex.baseFloor.tile);
+            newRoom = theSetting.additionalLayoutGenSteps(newRoom);
+            ObjectGenerationInput inputs = WallGeneration.defineWalls(newRoom, shapeChosen, theSetting);
+            ObjectGeneration.fillWithObjects(newRoom, inputs, theSetting);
+            DoorGeneration.addDoorsToRoom(newRoom, inputs, theSetting);
         }); 
         RoomBuilder.build(newRoom, standardTilemap);
         return newRoom;
@@ -56,7 +77,12 @@ public static class RoomBuilder
         {
             if(tile != null)
             {
-                tilemap.SetTile(tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset), tile.tileType);
+                tilemap.SetTile(tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset), tile.tileFill);
+                if(tile.roomObject != null && tile.objectBase)
+                {
+                    GameObject physical = GameObject.Instantiate(tile.roomObject.physicalObjectRef);
+                    physical.transform.position = tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset) + new Vector3(0.5f,0.5f);
+                }
             }
         }
     }
@@ -84,7 +110,7 @@ public static class LayoutGeneration
             {
                 // xx and yy are in REAL position.
                 // But when we generate the tile array, they get converted over there into ROOM position.
-                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill);
+                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill, RoomTileType.FLOOR);
                 workingTiles.Add(tile);
             }
         }
@@ -108,7 +134,7 @@ public static class LayoutGeneration
             {
                 // xx and yy are in REAL position.
                 // But when we generate the tile array, they get converted over there into ROOM position.
-                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill);
+                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill, RoomTileType.FLOOR);
                 workingTiles.Add(tile);
             }
         }
@@ -130,11 +156,12 @@ public static class LayoutGeneration
 
         for (int xx = settledMinX; xx < settledMaxX + 1; xx++)
         {
-            for (int yy = settledMinY; yy < (xx + 1 - settledMinX) + settledMinY; yy++)
+            //Triangle: y = slope * x + base_value, or (rise/run) * x + base_value
+            for (int yy = settledMinY; yy < (int)(((float)settledHeight / (float)settledBase) * (float)(xx + 1 - settledMinX) + settledMinY); yy++)
             {
                 // xx and yy are in REAL position.
                 // But when we generate the tile array, they get converted over there into ROOM position.
-                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill);
+                RoomTile tile = new RoomTile(true, new Coords(xx, yy), fill, RoomTileType.FLOOR);
                 workingTiles.Add(tile);
             }
         }
@@ -167,7 +194,7 @@ public static class LayoutGeneration
 // We could have done this all in layout gen, and had it be unique to each shape, to improve efficiency...but...at HEAVY cost of readability
 public static class WallGeneration
 {
-    public static ObjectGenerationInput defineWalls(Room room, LayoutShape shape, Tile demoTile)
+    public static ObjectGenerationInput defineWalls(Room room, LayoutShape shape, RG_SettingGen theSetting)
     {
         ObjectGenerationInput inputs = new ObjectGenerationInput(room, shape);
 
@@ -184,33 +211,50 @@ public static class WallGeneration
                 {
                     //If no tile above, this is FRONT WALL ADJACENT.
                     //Also, mark all non-existent tiles up to wallHeight above this as FRONT WALL tiles- you can't walk on them but we will draw them anyway
-                    if (room.isWallEligible(new Coords(xx, yy + 1)))
+                    if (room.tileArray[xx, yy + 1] == null)
                     {
-                        Debug.Log("This is a front wall tile: " + new Coords(xx, yy + 1));
                         inputs.adjFrontWall.Add(room.tileArray[xx, yy]);
                         for (int h = 1; h <= wallHeight; h++)
                         {
-                            room.tileArray[xx, yy + h] = new RoomTile(false, new Coords(xx, yy + h), demoTile);
+                            room.tileArray[xx, yy + h] = new RoomTile(false, new Coords(xx, yy + h), theSetting.tilemapCodex.frontWall.none, RoomTileType.FRONT_WALL);
+                            // The first of its kind (lowest to ground) can potentially become a door tile.
+                            if(h == 1) inputs.doorPoints.Add(room.tileArray[xx, yy + 1]);
                         }
                     }
                     //Both sides - mark this as SIDE WALL ADJACENT
                     // and the walls themselves are SIDE WALLS
-                    if (room.isWallEligible(new Coords(xx - 1, yy)))
+                    if (room.tileArray[xx - 1, yy] == null)
                     {
                         inputs.adjSideWall.Add(room.tileArray[xx, yy]);
                         for (int w = 1; w <= wallWidth; w++)
                         {
-                            room.tileArray[xx - w, yy] = new RoomTile(false, new Coords(xx - w, yy), demoTile);
+                            room.tileArray[xx - w, yy] = new RoomTile(false, new Coords(xx - w, yy), theSetting.tilemapCodex.sideWall.tile, RoomTileType.SIDE_WALL);
+                            if (w == 1) inputs.doorPoints.Add(room.tileArray[xx - 1, yy]);
                         }
                     }
-                    if (room.isWallEligible(new Coords(xx + 1, yy)))
+                    if (room.tileArray[xx + 1, yy] == null)
                     {
                         inputs.adjSideWall.Add(room.tileArray[xx, yy]);
                         for (int w = 1; w <= wallWidth; w++)
                         {
-                            room.tileArray[xx + w, yy] = new RoomTile(false, new Coords(xx + w, yy), demoTile);
+                            room.tileArray[xx + w, yy] = new RoomTile(false, new Coords(xx + w, yy), theSetting.tilemapCodex.sideWall.tile, RoomTileType.SIDE_WALL);
+                            if (w == 1) inputs.doorPoints.Add(room.tileArray[xx + 1, yy]);
                         }
                     }
+                }
+            }
+        }
+
+        // "Add borders" to the walls by simply changing their sprite.
+        for (int xx = 0; xx < room.roomWidthWithWall; xx++)
+        {
+            for (int yy = 0; yy < room.roomHeightWithWall; yy++)
+            {
+                RoomTile tile = room.tileArray[xx, yy];
+                if (tile != null && tile.type == RoomTileType.FRONT_WALL)
+                {
+                    int borderStatus = room.getBorderStatus(new Coords(xx, yy), (tile) => { return tile.type == RoomTileType.FRONT_WALL; });
+                    tile.tileFill = theSetting.tilemapCodex.frontWall.getBorderedTile(borderStatus);
                 }
             }
         }
@@ -224,20 +268,199 @@ public static class WallGeneration
 // --> TODO: Objects based on rules
 public static class ObjectGeneration
 {
-    public static Room fillWithObjects(Room room)
+    public static Room fillWithObjects(Room room, ObjectGenerationInput inputs, RG_SettingGen setting)
     {
-        //TODO Eventually we generate with respect to whatever rules are active
-        // For now we just rely on "generic" generation, adding in random things
+        // Generic generation: Add in the room objects specific to this setting.
+        foreach(RoomObject roomObj in setting.settingRoomObjects)
+        {
+            List<RoomTile> allPossiblePlaces = aggregatePossiblePlaces(roomObj, inputs);
+            // For each object, add it up to maxPossible times. Each potential occurance has same prob as before.
+            for(int occ = 0; occ < roomObj.properties.maxPossible; occ++)
+            {
+                int attemptsRemaining = 5;
+                TrySpawningObject:
+                    if(attemptsRemaining == 0)
+                    {
+                        Debug.LogWarning("Failed to spawn this object- ran out of attempts!: " + roomObj.properties.objectName);
+                        continue;
+                    }
+                    attemptsRemaining--;
+                    if (RoomGeneration.getRandomValue() < roomObj.properties.probability)
+                    {
+                        //Spawn if conditions are met: first you have to find a location
+                        if(allPossiblePlaces.Count == 0)
+                        {
+                            Debug.LogWarning("Ran out of places to put objects in this room! Could not create " + roomObj.properties.objectName);
+                            continue;
+                        }
+
+                        //We clone the properties of the template here and replace them with our own
+                        RoomObjectProperties newProperties = new RoomObjectProperties(roomObj.properties);
+                        newProperties.physicalObjectRef = roomObj.physicalObjectRef;
+
+                        RoomTile tile = allPossiblePlaces[RoomGeneration.getRandomRangeInt(0, allPossiblePlaces.Count - 1)];
+
+                        //If this location looks good, then spawn the object there.
+                        //Otherwise, try and spawn the object again
+                        if(verifyLocation(tile, newProperties, room))
+                        {
+                            spawnRoomObject(newProperties, room, tile);
+                            tile.objectBase = true;
+
+                            allPossiblePlaces.Remove(tile);
+                            foreach (Coords coords in newProperties.relativePositions)
+                            {
+                                Coords actualRelative = tile.tileCoords.offset(coords.x, coords.y);
+                                allPossiblePlaces.Remove(room.tileArray[actualRelative.x, actualRelative.y]);
+                            }
+                        } else
+                        {
+                            goto TrySpawningObject;
+                        }
+                    }
+                    //else break; ???
+            }
+        }
 
         //TODO be smarter about this.
         room.entryPoint = new Coords(2, 2);
 
         return room;
     }
+
+    /// Make sure there is nothing at where this room object is being placed - or any of its relative positions
+    private static bool verifyLocation(RoomTile tile, RoomObjectProperties props, Room room)
+    {
+        // Check for anything in the absolute or relative positions of this tile
+        if (room.getRoomObjectAt(tile.tileCoords) == null)
+        {
+            foreach(Coords co in props.relativePositions)
+            {
+                Coords actualRelative = tile.tileCoords.offset(co.x, co.y);
+                if (room.getRoomObjectAt(actualRelative) != null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else return false;
+    }
+
+    // Takes steps to add the object to the room
+    // Do not physically create it- that still happens at the end of everything, in build()
+    private static void spawnRoomObject(RoomObjectProperties props, Room room, RoomTile tile)
+    {
+        props.absoluteCoords = tile.tileCoords;
+        room.addRoomObject(props);
+    }
+
+    //TODO incorporate a set of roomObj places that are already taken
+    private static List<RoomTile> aggregatePossiblePlaces(RoomObject obj, ObjectGenerationInput inputs)
+    {
+        List<RoomTile> theFullList = new List<RoomTile>();
+        foreach(RoomObjectGenLocation loc in obj.properties.genLocation)
+        {
+            switch (loc)
+            {
+                case RoomObjectGenLocation.FRONT_WALL: theFullList.AddRange(inputs.frontWall); break;
+                case RoomObjectGenLocation.ADJ_FRONT_WALL: theFullList.AddRange(inputs.adjFrontWall); break;
+                case RoomObjectGenLocation.SIDE_WALL: theFullList.AddRange(inputs.sideWall); break;
+                case RoomObjectGenLocation.ADJ_SIDE_WALL: theFullList.AddRange(inputs.adjSideWall); break;
+                case RoomObjectGenLocation.BACK_WALL: theFullList.AddRange(inputs.backWall); break;
+                case RoomObjectGenLocation.ADJ_BACK_WALL: theFullList.AddRange(inputs.adjBackWall); break;
+                case RoomObjectGenLocation.DOOR_POINTS: theFullList.AddRange(inputs.doorPoints); break;
+                case RoomObjectGenLocation.GENERAL_CENTER: theFullList.AddRange(inputs.generalCenter); break;
+            }
+        }
+        theFullList.RemoveAll(tile => tile.roomObject != null);
+        return theFullList;
+    }
 }
 
 
+// Add doors to the room.
+// TODO: This HEAVILY relies on the rules!!!
+public static class DoorGeneration
+{
+    public static Room addDoorsToRoom(Room room, ObjectGenerationInput inputs, RG_SettingGen setting)
+    {
+        // Generic generation: Add in the room objects specific to this setting.
+        int numDoors = RoomGeneration.getRandomRangeInt(3, 6);
 
+        DoorObject doorInstance = setting.doorSprite[0]; //TODO: Whatd we need the list for again...?
+
+        for (int d = 0; d < numDoors; d++)
+        {
+            int numAttempts = 0;
+
+            TryAddingDoor:
+            RoomTile tile = inputs.doorPoints[RoomGeneration.getRandomRangeInt(0, inputs.doorPoints.Count - 1)];
+            if (numAttempts < 5 && !isClearPathway(tile, room))
+            {
+                numAttempts++;
+                goto TryAddingDoor;
+            } else if(numAttempts >= 5)
+            {
+                Debug.LogWarning("Could not add in door #" + d + ": ran out of attempts");
+                continue;
+            }
+
+            spawnRoomObject(doorInstance, room, tile);
+            tile.objectBase = true;
+
+            inputs.doorPoints.Remove(tile);
+
+            //Some doors may take up multiple spaces in the future...
+            /*foreach (Coords coords in roomObj.relativePositions)
+            {
+                Coords actualRelative = tile.tileCoords.offset(coords.x, coords.y);
+                allPossiblePlaces.Remove(room.tileArray[actualRelative.x, actualRelative.y]);
+            }*/
+        }
+
+        return room;
+    }
+
+    /// Can players get to the door?
+    /// NOTE: This is a lazy check right now, because we can reasonably assume room objects' locations will be somewhat predictable"
+    private static bool isClearPathway(RoomTile tile, Room room)
+    {
+        switch(tile.type)
+        {
+            case RoomTileType.FLOOR:
+                Coords co = tile.tileCoords;
+                return tile.roomObject == null && (getPossibleObject(co.offset(1,0), room) == null ||
+                    getPossibleObject(co.offset(-1, 0), room) == null ||
+                    getPossibleObject(co.offset(0, -1), room) == null ||
+                    getPossibleObject(co.offset(0, 1), room) == null);
+            case RoomTileType.SIDE_WALL:
+                Coords coA = tile.tileCoords;
+                return tile.roomObject == null && getPossibleObject(coA.offset(1, 0), room) == null && getPossibleObject(coA.offset(-1, 0), room) == null;
+            case RoomTileType.FRONT_WALL:
+                Coords coB = tile.tileCoords;
+                return tile.roomObject == null && getPossibleObject(coB.offset(0, -1), room) == null;
+            // TODO Back walls - just the opposite of front walls.
+            default:  return false;
+        }
+    }
+
+    private static RoomObjectProperties getPossibleObject(Coords co, Room room)
+    {
+        if (room.getAtTileArray(co) == null) return null;
+        else return room.tileArray[co.x, co.y].roomObject;
+    }
+
+    // Takes steps to add the object to the room
+    // Do not physically create it- that still happens at the end of everything, in build()
+    private static void spawnRoomObject(RoomObject obj, Room room, RoomTile tile)
+    {
+        RoomObjectProperties newProperties = new RoomObjectProperties(obj.properties);
+        newProperties.physicalObjectRef = obj.physicalObjectRef;
+        newProperties.absoluteCoords = tile.tileCoords;
+        room.addRoomObject(newProperties);
+    }
+}
 
 
 

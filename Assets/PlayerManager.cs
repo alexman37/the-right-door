@@ -20,9 +20,6 @@ public class PlayerManager : MonoBehaviour
     private Coroutine movingCoroutine; private bool isMoving;
     KeyCode holdingKey = KeyCode.None;
 
-    //Misc
-    private DialogueManager dialogueManager;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -30,16 +27,16 @@ public class PlayerManager : MonoBehaviour
 
         moveInputs = new List<(float time, float xChange, float yChange)>();
         startMovement();
-        dialogueManager = FindObjectsOfType<DialogueManager>()[0];
     }
 
     // Update is called once per frame
     void Update()
     {
         //Interaction
-        if(Input.GetKeyDown(KeyCode.E))
+        //TODO TODO TODO TODO TODO
+        /*if(Input.GetKeyDown(KeyCode.E))
         {
-            RoomObject maybeRoomObject = getInteractingWithEKeyObject();
+            RoomObjectProperties maybeRoomObject = getInteractingWithEKeyObject();
             if(maybeRoomObject != null)
             {
                 // If it's a door, open it!
@@ -50,13 +47,10 @@ public class PlayerManager : MonoBehaviour
                     (maybeRoomObject as DoorObject).openDoor();
                 } else
                 {
-                    if (maybeRoomObject.dialogueFile != null)
-                    {
-                        dialogueManager.processConversation(maybeRoomObject.dialogueFile);
-                    }
+                    maybeRoomObject.deployDialogue();
                 }
             }
-        }
+        }*/
 
         if(Input.GetKey(KeyCode.D))
         {
@@ -166,10 +160,9 @@ public class PlayerManager : MonoBehaviour
     /*Get the object you'd like to interact with by pressing the E key
      If you're standing on top of something, do that
      Otherwise, get the thing one grid space in front of you*/
-    private RoomObject getInteractingWithEKeyObject()
+    private RoomObjectProperties getInteractingWithEKeyObject()
     {
-        RoomObject onTopOf;
-        RoomObject inFrontOf;
+        RoomObjectProperties onTopOf;
 
         // Try getting on top of object first.
         onTopOf = RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition);

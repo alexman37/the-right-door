@@ -1,0 +1,92 @@
+ManifestFileVersion: 0
+CRC: 2129029116
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c3feb20fecd897c3a39186c73be263d3
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 69b4b314b206c0e40f41c4ae9c808a8f
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_8.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_59.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_23.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_32.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_1.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_27.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_15.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_3.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_28.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_47.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_58.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_2.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_34.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_18.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_65.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_60.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_64.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_62.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_45.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_11.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_22.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_16.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_57.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_14.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_37.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_44.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_56.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_6.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_24.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_10.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_51.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_5.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_41.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_69.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_21.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_49.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_35.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_30.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_53.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_66.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_20.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_43.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_63.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_52.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_48.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_13.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_68.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_12.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_33.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_0.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_55.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_54.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_26.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_36.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_67.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_38.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_61.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_31.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_19.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_40.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_17.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_46.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_42.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_29.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_7.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_50.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_25.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_39.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_9.asset
+- Assets/Tilemap_test/Mansion 3/mansionFinalPNG_4.asset
+Dependencies: []

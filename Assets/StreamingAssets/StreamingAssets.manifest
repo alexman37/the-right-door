@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 1154206706
+CRC: 2796058362
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -25,4 +25,7 @@ AssetBundleManifest:
       Dependencies: {}
     Info_7:
       Name: cassidy_portraits
+      Dependencies: {}
+    Info_8:
+      Name: tilemap_mansion
       Dependencies: {}

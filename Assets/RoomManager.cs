@@ -13,7 +13,7 @@ using UnityEngine.UI;
  */
 public class RoomManager : MonoBehaviour
 {
-    const int MAX_ROOMS_LOADED = 9;
+    const int MAX_ROOMS_LOADED = 16;
     public static Room activeRoom;
     public Room[] loadedRooms;
 
@@ -27,8 +27,7 @@ public class RoomManager : MonoBehaviour
     //TODO: REMOVE ALL OF THIS: It's just for testing.
     // Start is called before the first frame update
     public Tilemap standardTilemap;
-    public Tile demoTile;
-    public Tile demoTile2;
+    public RG_SettingGen theSetting;
     public RoomObject test1;
     public RoomObject test2;
     public DoorObject test3;
@@ -48,36 +47,41 @@ public class RoomManager : MonoBehaviour
 
         // Set up the STARTER ROOM
         // --> TODO This will probably get changed drastically
-        RoomTile[,] startTileArray = new RoomTile[10, 6];
-        for (int xx = -6; xx <= 3; xx++)
-        {
-            for (int yy = -3; yy <= 2; yy++)
+            RoomTile[,] startTileArray = new RoomTile[10, 6];
+            for (int xx = -6; xx <= 3; xx++)
             {
-                startTileArray[xx + 6, yy + 3] = new RoomTile(true, new Coords(xx + 6, yy + 3), demoTile);
+                for (int yy = -3; yy <= 2; yy++)
+                {
+                    startTileArray[xx + 6, yy + 3] = new RoomTile(true, new Coords(xx + 6, yy + 3), null, RoomTileType.FLOOR);
+                }
             }
-        }
-        Room starterRoom = new Room(new Coords(0,0), -6, -3, startTileArray, 10, 6);
+            Room starterRoom = new Room(new Coords(0,0), -6, -3, startTileArray, 10, 6);
+            starterRoom.roomNumber = 0;
 
-        generateNewRoom(1, new Coords(200, 0), standardTilemap, demoTile, demoTile2);
-        //This is sooooo illegal
-        
+            for(int i = 1; i < MAX_ROOMS_LOADED; i++)
+            {
+                generateNewRoom(i, new Coords(200 * (i % Mathf.CeilToInt(Mathf.Sqrt(MAX_ROOMS_LOADED))), 
+                    200 * (i / Mathf.CeilToInt(Mathf.Sqrt(MAX_ROOMS_LOADED)))), theSetting, standardTilemap);
+            }
+            //This is sooooo illegal
 
-        starterRoom.addRoomObject(test1);
-        starterRoom.addRoomObject(test2);
-        starterRoom.addRoomObject(test3);
-        starterRoom.addRoomObject(test4);
 
-        Debug.Log("Setting active room");
-        activeRoom = starterRoom;
+            starterRoom.addRoomObject(test1.properties);
+            starterRoom.addRoomObject(test2.properties);
+            starterRoom.addRoomObject(test3.properties);
+            starterRoom.addRoomObject(test4.properties);
+
+            Debug.Log("Setting active room");
+            activeRoom = starterRoom;
     }
 
     // Generate a new room in one of our load spots
-    async void generateNewRoom(int index, Coords pos, Tilemap tl, Tile demo, Tile demo2)
+    async void generateNewRoom(int index, Coords pos, RG_SettingGen theSetting, Tilemap tl)
     {
         //TODO clear out the old room!!!
 
         // Now generate the new room.
-        loadedRooms[index] = await RoomGeneration.generateNewRoom(pos, tl, demo, demo2);
+        loadedRooms[index] = await RoomGeneration.generateNewRoom(index, pos, theSetting, tl);
 
         //TODO
         test3.nextRoom = loadedRooms[1];
@@ -137,6 +141,7 @@ public class RoomManager : MonoBehaviour
 // Some objects in this room can be outside of the tileArray bounds
 public class Room
 {
+    public int roomNumber;
     public Coords criticalPoint; // Where room generation "begins." Could represent center, any corner, etc.
     public Coords entryPoint; // Where your characters spawn when entering this room - Vector2 since it's in real position, not room pos
 
@@ -151,7 +156,7 @@ public class Room
     public int roomHeightWithWall;
 
     //Turns out Unity Dictionaries' ContainsKey() method only looks for Physical equality. Go figure...
-    public Dictionary<Vector2Int, RoomObject> roomObjectsMap = new Dictionary<Vector2Int, RoomObject>();
+    public Dictionary<Vector2Int, RoomObjectProperties> roomObjectsMap = new Dictionary<Vector2Int, RoomObjectProperties>();
 
     public Room(Coords crit, int xo, int yo, RoomTile[,] roomTiles, int trueWidth, int trueHeight)
     {
@@ -171,19 +176,21 @@ public class Room
         return roomPos.offset(roomPosToRealPosXOffset, roomPosToRealPosYOffset).asVector2();
     }
 
-    // Add this room object
-    public void addRoomObject(RoomObject ro)
+    // Add this room object to the roomTile (if eligible). That means it can no longer be walked on
+    public void addRoomObject(RoomObjectProperties ro)
     {
+        Debug.Log("Adding object " + ro.objectName + " to " + ro.absoluteCoords.x + "," + ro.absoluteCoords.y + " in room " + roomNumber + " which is currently " + tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y]);
         roomObjectsMap.Add(ro.absoluteCoords.asVector2Int(), ro);
-        if (inBounds(ro.absoluteCoords))
+        if (inBoundsIncludingWalls(ro.absoluteCoords))
         {
+            Debug.Log("Adding object " + ro.objectName + " to " + ro.absoluteCoords.x + "," + ro.absoluteCoords.y + " in room " + roomNumber +" which is currently " + tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y]);
             tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y].roomObject = ro;
             tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y].walkable = false;
         }
 
         foreach (Coords c in ro.relativePositions)
         {
-            roomObjectsMap.Add(c.asVector2Int(), ro);
+            roomObjectsMap.Add(ro.absoluteCoords.offset(c.x, c.y).asVector2Int(), ro);
 
             Coords other = ro.absoluteCoords.offset(c.x, c.y);
             if (inBounds(other))
@@ -194,19 +201,33 @@ public class Room
         }
     }
 
+    /// <summary>
+    ///  Returns either the tile at coordinates (which may be null), or "null" if out of bounds entirely.
+    /// </summary>
+    public RoomTile getAtTileArray(Coords co)
+    {
+        if (!inBoundsIncludingWalls(co)) return null;
+        else return tileArray[co.x, co.y];
+    }
+
+    // Is it "in bounds"?
+    //TODO: I dont think we need this anymore...
     public bool inBounds(Coords wouldBeHere)
     {
         int trueStartOfRoomX = (roomWidthWithWall - roomWidth) / 2;
         return wouldBeHere.x >= trueStartOfRoomX && wouldBeHere.y >= 0 && wouldBeHere.x < trueStartOfRoomX + roomWidth && wouldBeHere.y < roomHeight;
     }
 
-    //Only use this in wall generation
-    public bool isWallEligible(Coords neighboring)
+    // Note "bounds" is just a square that includes all floor tiles, all wall tiles, and potentially many nulls if the shape is irregular
+    // This method is just for making sure we don't access outside of tileArray's indices.
+    public bool inBoundsIncludingWalls(Coords wouldBeHere)
     {
-        return !inBounds(neighboring) || tileArray[neighboring.x, neighboring.y] == null;
+        return wouldBeHere.x >= 0 && wouldBeHere.y >= 0 && wouldBeHere.x < roomWidthWithWall && wouldBeHere.y < roomHeightWithWall;
     }
 
-    public RoomObject getRoomObjectAt(Coords position)
+    // Return room object at this position, if there is one. Check the tile first, and if nothing's there, check the roomObjects dictionary as well
+    // Both checks should go pretty fast
+    public RoomObjectProperties getRoomObjectAt(Coords position)
     {
         if (inBounds(position))
             return tileArray[position.x, position.y].roomObject;
@@ -218,6 +239,67 @@ public class Room
             else return null;
         }
     }
+
+    // Returns the 4 adjacent "tiles" which could be null if they are out of bounds or simply not set
+    public RoomTile[] getNeighbors(Coords coords)
+    {
+        return new RoomTile[] { 
+            inBoundsIncludingWalls(coords.offset(1,0))  ? tileArray[coords.x + 1, coords.y] : null,
+            inBoundsIncludingWalls(coords.offset(-1,0)) ? tileArray[coords.x - 1, coords.y] : null,
+            inBoundsIncludingWalls(coords.offset(0,1))  ? tileArray[coords.x, coords.y + 1] : null,
+            inBoundsIncludingWalls(coords.offset(0,-1)) ? tileArray[coords.x, coords.y - 1] : null
+        };
+    }
+
+    // We must pass in a "true or false comparator" of some sort
+    public delegate bool tileMatchesCheck(RoomTile tile);
+
+    ///A very ugly method for getting the border status of a tile. Hide!
+    public int getBorderStatus(Coords position, tileMatchesCheck comparator)
+    {
+        switch(getNumLikewiseNeighbors(position, comparator))
+        {
+            // 0: No likewise neighbors. make borders on all sides.
+            // 4: All likewise neighbors. do nothing.
+            case 0: return 15;
+            case 4: return 0;
+            case 1:
+                if (isLikewiseNeighbor(position.offset(1, 0), comparator)) return 11;
+                if (isLikewiseNeighbor(position.offset(0, 1), comparator)) return 12;
+                if (isLikewiseNeighbor(position.offset(-1, 0), comparator)) return 13;
+                else return 14;
+            case 3:
+                if (!isLikewiseNeighbor(position.offset(1, 0), comparator)) return 1;
+                if (!isLikewiseNeighbor(position.offset(0, 1), comparator)) return 2;
+                if (!isLikewiseNeighbor(position.offset(-1, 0), comparator)) return 3;
+                else return 4;
+            case 2:
+                if (isLikewiseNeighbor(position.offset(-1, 0), comparator) && isLikewiseNeighbor(position.offset(0, -1), comparator)) return 5;
+                if (isLikewiseNeighbor(position.offset(0, -1), comparator) && isLikewiseNeighbor(position.offset(1, 0), comparator)) return 6;
+                if (isLikewiseNeighbor(position.offset(1, 0), comparator) && isLikewiseNeighbor(position.offset(0, 1), comparator)) return 7;
+                if (isLikewiseNeighbor(position.offset(0, 1), comparator) && isLikewiseNeighbor(position.offset(-1, 0), comparator)) return 8;
+                if (isLikewiseNeighbor(position.offset(0, 1), comparator) && isLikewiseNeighbor(position.offset(0, -1), comparator)) return 9;
+                else return 10;
+            default: return 0;
+        }
+    }
+
+    /// How many tiles of a particular type does this tile border?
+    public int getNumLikewiseNeighbors(Coords position, tileMatchesCheck comparator)
+    {
+        int count = 0;
+        if (isLikewiseNeighbor(position.offset(1, 0), comparator)) count += 1;
+        if (isLikewiseNeighbor(position.offset(-1, 0), comparator)) count += 1;
+        if (isLikewiseNeighbor(position.offset(0, 1), comparator)) count += 1;
+        if (isLikewiseNeighbor(position.offset(0, -1), comparator)) count += 1;
+        return count;
+    }
+
+    /// Does the tile at position's type or fill match the provided criteria?
+    private bool isLikewiseNeighbor(Coords position, tileMatchesCheck comparator)
+    {
+        return inBoundsIncludingWalls(position) && tileArray[position.x, position.y] != null && comparator(tileArray[position.x, position.y]);
+    }
 }
 
 // RoomTile tileCoords keeps track of "ROOM POSITION" not real position
@@ -226,13 +308,19 @@ public class RoomTile
 {
     public bool walkable;
     public Coords tileCoords;
-    public Tile tileType;
-    public RoomObject roomObject;
-    public RoomTile(bool w, Coords c, Tile t)
+    public Tile tileFill;
+    public RoomTileType type;
+    public string genFlag; //a flag solely used in generation. could be anything
+
+    public RoomObjectProperties roomObject;
+    public bool objectBase = false;
+
+    public RoomTile(bool w, Coords c, Tile t, RoomTileType type)
     {
         walkable = w;
         tileCoords = c;
-        tileType = t;
+        tileFill = t;
+        this.type = type;
     }
 
     public override string ToString()
@@ -244,6 +332,18 @@ public class RoomTile
     {
         return tileCoords.offset(roomPosToRealPosXOffset, roomPosToRealPosYOffset).asVector3Int();
     }
+
+    public Coords[] getNeighborsCoords()
+    {
+        return new Coords[] { tileCoords.offset(1,0), tileCoords.offset(-1,0), tileCoords.offset(0,-1), tileCoords.offset(0,1) };
+    }
+}
+
+public enum RoomTileType
+{
+    FLOOR,
+    FRONT_WALL,
+    SIDE_WALL
 }
 
 /* Our coordinate system is based in "room coords" and "real coords", where:
