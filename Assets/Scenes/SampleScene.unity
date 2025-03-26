@@ -1017,6 +1017,7 @@ MonoBehaviour:
     probability: 0
     maxPossible: 0
   correct: 0
+  nextRoom: 0
 --- !u!1 &748347200
 GameObject:
   m_ObjectHideFlags: 0
@@ -1381,6 +1382,7 @@ MonoBehaviour:
     probability: 0
     maxPossible: 0
   correct: 1
+  nextRoom: 0
 --- !u!95 &926609078
 Animator:
   serializedVersion: 3
@@ -3592,7 +3594,7 @@ MonoBehaviour:
     roomObjectRef: {fileID: 1652881005}
     genLocation: 03000000
     probability: 1
-    maxPossible: 2
+    maxPossible: 1
 --- !u!4 &1652881006 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2522041595018427961, guid: 824781952304ced469c9e8caf5a8743a, type: 3}

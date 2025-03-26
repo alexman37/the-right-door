@@ -52,12 +52,11 @@ public static class RoomGeneration
         Room newRoom = null;
         await Task.Run(() =>
         {
-            LayoutShape shapeChosen = LayoutShape.RECTANGLE;
+            LayoutShape shapeChosen = (LayoutShape)getRandomRangeInt(0,2);
 
-            //newRoom = LayoutGeneration.randomSquare(criticalPoint, getRandomRangeInt(5,10), theSetting.tilemapCodex.baseFloor.tile);
-            newRoom = LayoutGeneration.randomRect(criticalPoint, getRandomRangeInt(5, 10), getRandomRangeInt(5, 10), theSetting.tilemapCodex.baseFloor.tile);
+            newRoom = getShapedRoom(shapeChosen, criticalPoint, theSetting);
             newRoom.roomNumber = index;
-            //newRoom = LayoutGeneration.randomRightTriangle(criticalPoint, getRandomRangeInt(5,11), getRandomRangeInt(5,11), theSetting.tilemapCodex.baseFloor.tile);
+
             newRoom = theSetting.additionalLayoutGenSteps(newRoom);
             ObjectGenerationInput inputs = WallGeneration.defineWalls(newRoom, shapeChosen, theSetting);
             ObjectGeneration.fillWithObjects(newRoom, inputs, theSetting);
@@ -65,6 +64,20 @@ public static class RoomGeneration
         }); 
         RoomBuilder.build(newRoom, standardTilemap);
         return newRoom;
+    }
+
+    private static Room getShapedRoom(LayoutShape shape, Coords criticalPoint, RG_SettingGen theSetting)
+    {
+        switch (shape)
+        {
+            case LayoutShape.SQUARE:
+                return LayoutGeneration.randomSquare(criticalPoint, getRandomRangeInt(5, 10), theSetting.tilemapCodex.baseFloor.tile);
+            case LayoutShape.RECTANGLE:
+                return LayoutGeneration.randomRect(criticalPoint, getRandomRangeInt(5, 10), getRandomRangeInt(5, 10), theSetting.tilemapCodex.baseFloor.tile);
+            case LayoutShape.RIGHT_TRIANGLE:
+                return LayoutGeneration.randomRightTriangle(criticalPoint, getRandomRangeInt(5, 11), getRandomRangeInt(5, 11), theSetting.tilemapCodex.baseFloor.tile);
+            default: return null;
+        }
     }
 }
 

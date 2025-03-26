@@ -13,7 +13,7 @@ using UnityEngine.UI;
  */
 public class RoomManager : MonoBehaviour
 {
-    const int MAX_ROOMS_LOADED = 16;
+    const int MAX_ROOMS_LOADED = 9;
     public static Room activeRoom;
     public static Room[] loadedRooms;
 
