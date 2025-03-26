@@ -33,10 +33,9 @@ public class PlayerManager : MonoBehaviour
     void Update()
     {
         //Interaction
-        //TODO TODO TODO TODO TODO
-        /*if(Input.GetKeyDown(KeyCode.E))
+        if(Input.GetKeyDown(KeyCode.E))
         {
-            RoomObjectProperties maybeRoomObject = getInteractingWithEKeyObject();
+            RoomObject maybeRoomObject = getInteractingWithEKeyObject();
             if(maybeRoomObject != null)
             {
                 // If it's a door, open it!
@@ -50,7 +49,7 @@ public class PlayerManager : MonoBehaviour
                     maybeRoomObject.deployDialogue();
                 }
             }
-        }*/
+        }
 
         if(Input.GetKey(KeyCode.D))
         {
@@ -160,9 +159,9 @@ public class PlayerManager : MonoBehaviour
     /*Get the object you'd like to interact with by pressing the E key
      If you're standing on top of something, do that
      Otherwise, get the thing one grid space in front of you*/
-    private RoomObjectProperties getInteractingWithEKeyObject()
+    private RoomObject getInteractingWithEKeyObject()
     {
-        RoomObjectProperties onTopOf;
+        RoomObject onTopOf;
 
         // Try getting on top of object first.
         onTopOf = RoomManager.activeRoom.getRoomObjectAt(playerObjects[0].currPosition);

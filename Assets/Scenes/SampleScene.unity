@@ -396,16 +396,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f276d41985fe3774bb1c7157c72ab36a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicalObjectRef: {fileID: 241347903}
+  physicalObjectRef: {fileID: 0}
   properties:
     objectName: Table
     dialogueFile: {fileID: 4900000, guid: 1c0a480fcf4e41e4b8b7334e130dc074, type: 3}
     mouseOverLabel: 
     absoluteCoords:
       x: 5
-      y: 4
+      y: 5
     relativePositions: []
-    physicalObjectRef: {fileID: 241347903}
+    physicalObjectRef: {fileID: 0}
+    roomObjectRef: {fileID: 241347904}
     genLocation: 010000000300000005000000
     probability: 1
     maxPossible: 3
@@ -1011,6 +1012,7 @@ MonoBehaviour:
       y: 5
     relativePositions: []
     physicalObjectRef: {fileID: 674688230}
+    roomObjectRef: {fileID: 674688233}
     genLocation: 
     probability: 0
     maxPossible: 0
@@ -1374,6 +1376,7 @@ MonoBehaviour:
       y: 5
     relativePositions: []
     physicalObjectRef: {fileID: 926609074}
+    roomObjectRef: {fileID: 926609077}
     genLocation: 
     probability: 0
     maxPossible: 0
@@ -3574,18 +3577,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f276d41985fe3774bb1c7157c72ab36a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicalObjectRef: {fileID: 1652881004}
+  physicalObjectRef: {fileID: 0}
   properties:
     objectName: LongTable
     dialogueFile: {fileID: 4900000, guid: 1c0a480fcf4e41e4b8b7334e130dc074, type: 3}
     mouseOverLabel: 
     absoluteCoords:
-      x: 1
-      y: 4
+      x: 0
+      y: 3
     relativePositions:
     - x: 0
       y: 1
-    physicalObjectRef: {fileID: 1652881004}
+    physicalObjectRef: {fileID: 0}
+    roomObjectRef: {fileID: 1652881005}
     genLocation: 03000000
     probability: 1
     maxPossible: 2

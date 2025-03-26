@@ -47,7 +47,7 @@ public class RoomManager : MonoBehaviour
 
         // Set up the STARTER ROOM
         // --> TODO This will probably get changed drastically
-            RoomTile[,] startTileArray = new RoomTile[10, 6];
+            RoomTile[,] startTileArray = new RoomTile[10, 6]; //THIS IS NOT ACCURATE TO THE REAL, INC. WALLS THING
             for (int xx = -6; xx <= 3; xx++)
             {
                 for (int yy = -3; yy <= 2; yy++)
@@ -183,8 +183,7 @@ public class Room
         roomObjectsMap.Add(ro.absoluteCoords.asVector2Int(), ro);
         if (inBoundsIncludingWalls(ro.absoluteCoords))
         {
-            Debug.Log("Adding object " + ro.objectName + " to " + ro.absoluteCoords.x + "," + ro.absoluteCoords.y + " in room " + roomNumber +" which is currently " + tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y]);
-            tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y].roomObject = ro;
+            tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y].roomObjectProps = ro;
             tileArray[ro.absoluteCoords.x, ro.absoluteCoords.y].walkable = false;
         }
 
@@ -195,7 +194,7 @@ public class Room
             Coords other = ro.absoluteCoords.offset(c.x, c.y);
             if (inBounds(other))
             {
-                tileArray[other.x, other.y].roomObject = ro;
+                tileArray[other.x, other.y].roomObjectProps = ro;
                 tileArray[other.x, other.y].walkable = false;
             }
         }
@@ -227,15 +226,14 @@ public class Room
 
     // Return room object at this position, if there is one. Check the tile first, and if nothing's there, check the roomObjects dictionary as well
     // Both checks should go pretty fast
-    public RoomObjectProperties getRoomObjectAt(Coords position)
+    public RoomObject getRoomObjectAt(Coords position)
     {
-        if (inBounds(position))
-            return tileArray[position.x, position.y].roomObject;
+        if (inBoundsIncludingWalls(position) && tileArray[position.x, position.y].roomObjectProps != null)
+            return tileArray[position.x, position.y].roomObjectProps.roomObjectRef;
         //Potentially, there is a room object lying out of bounds- such as a door.
         else
         {
-
-            if (roomObjectsMap.ContainsKey(position.asVector2Int())) return roomObjectsMap[position.asVector2Int()];
+            if (roomObjectsMap.ContainsKey(position.asVector2Int())) return roomObjectsMap[position.asVector2Int()].roomObjectRef;
             else return null;
         }
     }
@@ -312,7 +310,7 @@ public class RoomTile
     public RoomTileType type;
     public string genFlag; //a flag solely used in generation. could be anything
 
-    public RoomObjectProperties roomObject;
+    public RoomObjectProperties roomObjectProps;
     public bool objectBase = false;
 
     public RoomTile(bool w, Coords c, Tile t, RoomTileType type)

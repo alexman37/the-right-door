@@ -8,13 +8,16 @@ using UnityEngine;
 */
 public class RoomObject : MonoBehaviour
 {
+    [HideInInspector]
     public GameObject physicalObjectRef; // Needed bc of main thread BS
+
     public RoomObjectProperties properties;
     private static DialogueManager dialogueManager;
 
     private void Start()
     {
         dialogueManager = FindObjectsOfType<DialogueManager>()[0];
+        physicalObjectRef = this.gameObject;
     }
 
     // If you are looking at an object and press E, you see its dialogue if there is any
@@ -83,7 +86,9 @@ public class RoomObjectProperties
     public Coords[] relativePositions; // RELATIVE to absolute coords, the object also extends to these places
 
     //Physical Game Object Reference
+    [HideInInspector]
     public GameObject physicalObjectRef;
+    public RoomObject roomObjectRef;
 
     //Generation:
     public List<RoomObjectGenLocation> genLocation; // Where to spawn this object in random rooms

@@ -77,10 +77,17 @@ public static class RoomBuilder
         {
             if(tile != null)
             {
+                // If there's a tile, draw that first. And if it also has a room object...
                 tilemap.SetTile(tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset), tile.tileFill);
-                if(tile.roomObject != null && tile.objectBase)
+                if(tile.roomObjectProps != null && tile.objectBase)
                 {
-                    GameObject physical = GameObject.Instantiate(tile.roomObject.physicalObjectRef);
+                    // Two big concerns here:
+                    // 1. Actually instantiate the new physical object and put it in the right place
+                    GameObject physical = GameObject.Instantiate(tile.roomObjectProps.physicalObjectRef);
+                    // 2. Link the RoomObject and its properties to each other (if you find a better way then bloody DO IT)
+                    RoomObject newRoomObject = physical.GetComponent<RoomObject>();
+                    tile.roomObjectProps.roomObjectRef = newRoomObject;
+                    newRoomObject.properties = tile.roomObjectProps;
                     physical.transform.position = tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset) + new Vector3(0.5f,0.5f);
                 }
             }
@@ -373,7 +380,7 @@ public static class ObjectGeneration
                 case RoomObjectGenLocation.GENERAL_CENTER: theFullList.AddRange(inputs.generalCenter); break;
             }
         }
-        theFullList.RemoveAll(tile => tile.roomObject != null);
+        theFullList.RemoveAll(tile => tile.roomObjectProps != null);
         return theFullList;
     }
 }
@@ -430,16 +437,16 @@ public static class DoorGeneration
         {
             case RoomTileType.FLOOR:
                 Coords co = tile.tileCoords;
-                return tile.roomObject == null && (getPossibleObject(co.offset(1,0), room) == null ||
+                return tile.roomObjectProps == null && (getPossibleObject(co.offset(1,0), room) == null ||
                     getPossibleObject(co.offset(-1, 0), room) == null ||
                     getPossibleObject(co.offset(0, -1), room) == null ||
                     getPossibleObject(co.offset(0, 1), room) == null);
             case RoomTileType.SIDE_WALL:
                 Coords coA = tile.tileCoords;
-                return tile.roomObject == null && getPossibleObject(coA.offset(1, 0), room) == null && getPossibleObject(coA.offset(-1, 0), room) == null;
+                return tile.roomObjectProps == null && getPossibleObject(coA.offset(1, 0), room) == null && getPossibleObject(coA.offset(-1, 0), room) == null;
             case RoomTileType.FRONT_WALL:
                 Coords coB = tile.tileCoords;
-                return tile.roomObject == null && getPossibleObject(coB.offset(0, -1), room) == null;
+                return tile.roomObjectProps == null && getPossibleObject(coB.offset(0, -1), room) == null;
             // TODO Back walls - just the opposite of front walls.
             default:  return false;
         }
@@ -448,7 +455,7 @@ public static class DoorGeneration
     private static RoomObjectProperties getPossibleObject(Coords co, Room room)
     {
         if (room.getAtTileArray(co) == null) return null;
-        else return room.tileArray[co.x, co.y].roomObject;
+        else return room.tileArray[co.x, co.y].roomObjectProps;
     }
 
     // Takes steps to add the object to the room
