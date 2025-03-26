@@ -81,12 +81,17 @@ public static class RoomBuilder
                 tilemap.SetTile(tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset), tile.tileFill);
                 if(tile.roomObjectProps != null && tile.objectBase)
                 {
-                    // Two big concerns here:
+                    // A few big concerns here:
                     // 1. Actually instantiate the new physical object and put it in the right place
                     GameObject physical = GameObject.Instantiate(tile.roomObjectProps.physicalObjectRef);
                     // 2. Link the RoomObject and its properties to each other (if you find a better way then bloody DO IT)
                     RoomObject newRoomObject = physical.GetComponent<RoomObject>();
                     tile.roomObjectProps.roomObjectRef = newRoomObject;
+                    // 3. Link doors to the numerical next room
+                    if(newRoomObject is DoorObject)
+                    {
+                        (newRoomObject as DoorObject).nextRoom = room.roomNumber + 1;
+                    }
                     newRoomObject.properties = tile.roomObjectProps;
                     physical.transform.position = tile.getRealPos(room.roomPosToRealPosXOffset, room.roomPosToRealPosYOffset) + new Vector3(0.5f,0.5f);
                 }

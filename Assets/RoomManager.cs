@@ -15,7 +15,7 @@ public class RoomManager : MonoBehaviour
 {
     const int MAX_ROOMS_LOADED = 16;
     public static Room activeRoom;
-    public Room[] loadedRooms;
+    public static Room[] loadedRooms;
 
     public static event Action<Room> currentRoomChanged;
 
@@ -70,6 +70,7 @@ public class RoomManager : MonoBehaviour
             starterRoom.addRoomObject(test2.properties);
             starterRoom.addRoomObject(test3.properties);
             starterRoom.addRoomObject(test4.properties);
+            test3.nextRoom = 1;
 
             Debug.Log("Setting active room");
             activeRoom = starterRoom;
@@ -78,13 +79,10 @@ public class RoomManager : MonoBehaviour
     // Generate a new room in one of our load spots
     async void generateNewRoom(int index, Coords pos, RG_SettingGen theSetting, Tilemap tl)
     {
-        //TODO clear out the old room!!!
+        //TODO clear out the old room!!! (in changeCurrentRoom)
 
         // Now generate the new room.
         loadedRooms[index] = await RoomGeneration.generateNewRoom(index, pos, theSetting, tl);
-
-        //TODO
-        test3.nextRoom = loadedRooms[1];
     }
 
 
@@ -92,9 +90,12 @@ public class RoomManager : MonoBehaviour
     // Generate a new room at a designated location.
     // We should make this an async process, and we have to be smart about when we do it.
 
-    public static void changeCurrentRoom(Room changeToThis)
+    public static void changeCurrentRoom(int nextRoomIndex)
     {
         playerManager.stopMovement();
+        Room changeToThis = loadedRooms[nextRoomIndex];
+
+        //TODO unload the previous room here and generate a new one in its place
         activeRoom = changeToThis;
 
         //Fade transition

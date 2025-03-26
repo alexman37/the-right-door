@@ -10,7 +10,7 @@ public class DoorObject : RoomObject
 {
     public bool correct;
     private Animator animator;
-    public Room nextRoom;
+    public int nextRoom;
     public WrongDoorConsequences consequences;
 
     // Start is called before the first frame update
@@ -31,14 +31,10 @@ public class DoorObject : RoomObject
     {
         if (correct)
         {
-            if (nextRoom != null) {
-                //Play opening animation
-                animator.SetTrigger("Opened");
+            animator.SetTrigger("Opened");
 
-                // RoomManager handles the fade transition
-                RoomManager.changeCurrentRoom(nextRoom);
-            }
-            else Debug.LogError("Next room not found for this door");
+            // RoomManager handles the fade transition
+            RoomManager.changeCurrentRoom(nextRoom);
         } else
         {
             //TODO suffer consequences
